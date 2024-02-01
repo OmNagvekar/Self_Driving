@@ -1,5 +1,5 @@
 from Detectron import *
 
-detector= Detectron(model_type="OD")
+detector= Detectron(model_type="IS")
 
-detector.onImage("image/1.jpg")
+detector.onImage("./image/2.jpeg")

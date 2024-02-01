@@ -1,14 +1,17 @@
 from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
+from detectron2.utils.logger import setup_logger
 from detectron2.data import MetadataCatalog
 from detectron2.utils.visualizer import ColorMode, Visualizer
 from detectron2 import model_zoo
+import matplotlib.pyplot as plt
 
 import cv2 
 import numpy as np
 
 class Detectron:
     def __init__(self, model_type):
+        setup_logger()
         self.cfg = get_cfg()
         if model_type=="OD":
             self.cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"))
@@ -22,10 +25,11 @@ class Detectron:
     
     def onImage(self, imagePath):
         image = cv2.imread(imagePath)
-        predictions = self.predictor(image)
+        predictions = self.predictor(image[...,::-1])
         print(predictions)
-        viz = Visualizer(image[:,:,::-1],metadata = MetadataCatalog.get(self.cfg.DATASETS.TRAIN[0]),instance_mode = ColorMode.SEGMENTATION)
+        viz = Visualizer(image[:,:,::-1],MetadataCatalog.get(self.cfg.DATASETS.TRAIN[0]),scale = 1.2)
         output = viz.draw_instance_predictions(predictions["instances"].to("cpu"))
         # print(output.get_image()[:,:,::-1])
-        cv2.imshow("Result",output.get_image()[:,:,::-1])
+        plt.figure(figsize=(20,10))
+        cv2.imshow("Result",output.get_image()[:,:,::-1][...,::-1])
         cv2.waitKey(0)
