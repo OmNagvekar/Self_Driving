@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Navigation</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #map-container {
+            display: grid;
+            grid-template-columns: repeat(10, 40px);
+            grid-template-rows: repeat(10, 40px);
+            gap: 2px;
+            background-color: #eee;
+            border: 1px solid #ccc;
+        }
+
+        .grid-cell {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .V {
+            background-color: lightblue;
+        }
+
+        .G {
+            background-color: lightgreen;
+        }
+
+        .X {
+            background-color: #ff6666;
+        }
+    </style>
+</head>
+<body>
+    <div id="map-container"></div>
+    <button id="start-btn">Start Simulation</button>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let intervalId;
+
+            // Function to update the map on the frontend
+            function updateMap(data) {
+    $('#map-container').empty();
+    for (let i = 0; i < data.grid.length; i++) {
+        for (let j = 0; j < data.grid[i].length; j++) {
+            let cellClass = 'grid-cell';
+            if (i == data.vehicle_position[0] && j == data.vehicle_position[1]) {
+                cellClass += ' V';
+            } else if (i == data.goal_position[0] && j == data.goal_position[1]) {
+                cellClass += ' G';
+            } else if (data.grid[i][j] == 'X') {
+                cellClass += ' X';
+            }
+            $('#map-container').append(`<div class="${cellClass}">${data.grid[i][j]}</div>`);
+        }
+    }
+}
+
+            // Function to move the vehicle
+            function moveVehicle() {
+                $.ajax({
+                    type: 'POST',
+                    url: '/move_vehicle',
+                    success: function(response) {
+                        if (response.success) {
+                            getMap();  // Update the map after moving the vehicle
+                        }
+                    }
+                });
+            }
+
+            // Function to get the initial map
+            function getMap() {
+                $.ajax({
+                    type: 'GET',
+                    url: '/get_map',
+                    success: function(response) {
+                        updateMap(response);
+                    }
+                });
+            }
+
+            // Start the simulation on button click
+            $('#start-btn').click(function() {
+                intervalId = setInterval(moveVehicle, 1000);  // Move the vehicle every 1 second
+            });
+
+            // Initial setup
+            getMap();
+        });
+    </script>
+</body>
+</html>
