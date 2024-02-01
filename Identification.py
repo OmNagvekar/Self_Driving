@@ -1,4 +1,3 @@
-import detectron2
 from detectron2.utils.logger import setup_logger
 setup_logger()
 
@@ -9,9 +8,7 @@ from detectron2.utils.visualizer import Visualizer
 from detectron2.data import MetadataCatalog, DatasetCatalog
 from detectron2.structures import BoxMode
 import numpy as np
-import os, json, cv2, random
-import matplotlib.pyplot as plt
-
+import  cv2
 
 class Detectron:
     def __init__(self):
@@ -19,9 +16,9 @@ class Detectron:
         self.predictor = None
         self.results = None
 
-    def I_S_configure(self):
+    def I_S_configure(self,threshold):
         self.cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
-        self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5 
+        self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = threshold 
         self.cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")
         self.cfg.MODEL.DEVICE = "cpu"
 
@@ -44,9 +41,9 @@ class Detectron:
 
 if __name__ == "__main__":
         Object = Detectron()
-        Object.I_S_configure()
+        Object.I_S_configure(0.5)
         Object.get_predictor()
-        Object.predict(image = './image/1.jpg')
+        Object.predict(image = './image/2.jpeg')
         Object.show_result()
 
 
